@@ -1,15 +1,28 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page session="false" %>
 <%
+    // Initialize the To-Do list in the application scope if it doesn't exist
     List<String> todoList = (List<String>) application.getAttribute("todoList");
     if (todoList == null) {
         todoList = new ArrayList<>();
         application.setAttribute("todoList", todoList);
     }
-%>
 
+    // Handle form submission
+    String task = request.getParameter("task");
+    String removeIndex = request.getParameter("remove");
+    if (task != null && !task.trim().isEmpty()) {
+        todoList.add(task);
+    }
+    if (removeIndex != null) {
+        int index = Integer.parseInt(removeIndex);
+        if (index >= 0 && index < todoList.size()) {
+            todoList.remove(index);
+        }
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,90 +38,66 @@
         }
         h1 {
             color: #333;
-            text-align: center;
         }
         form {
-            display: flex;
-            justify-content: center;
             margin-bottom: 20px;
         }
         input[type="text"] {
             padding: 10px;
             width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
         }
         input[type="submit"] {
-            padding: 10px 15px;
-            border: none;
+            padding: 10px;
             background-color: #5cb85c;
             color: white;
-            border-radius: 4px;
+            border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
         input[type="submit"]:hover {
             background-color: #4cae4c;
-        }
-        h2 {
-            color: #555;
         }
         ul {
             list-style-type: none;
             padding: 0;
         }
         li {
-            background: #fff;
-            margin: 10px 0;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            background-color: #fff;
+            margin: 5px 0;
+            border-radius: 5px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
-        li form {
-            display: inline;
-        }
-        li button {
+        .remove-button {
             background-color: #d9534f;
-            border: none;
             color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
+            border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border-radius: 5px;
+            padding: 5px 10px;
         }
-        li button:hover {
+        .remove-button:hover {
             background-color: #c9302c;
         }
     </style>
 </head>
 <body>
-    <h1>To-Do List</h1>
-
-    <form action="todo" method="post">
-        <input type="text" name="task" placeholder="Enter a new task" required>
+    <h1>My To-Do List</h1>
+    <form action="index.jsp" method="post">
+        <input type="text" name="task" placeholder="Add a new task..." required>
         <input type="submit" value="Add Task">
     </form>
 
-    <h2>Your Tasks:</h2>
     <ul>
-        <%
-            for (int i = 0; i < todoList.size(); i++) {
-                String task = todoList.get(i);
-        %>
-                <li>
-                    <%= task %>
-                    <form action="todo" method="post">
-                        <input type="hidden" name="remove" value="<%= i %>">
-                        <input type="submit" value="Remove">
-                    </form>
-                </li>
-        <%
-            }
-        %>
+        <% for (int i = 0; i < todoList.size(); i++) { %>
+            <li>
+                <span><%= todoList.get(i) %></span>
+                <form action="index.jsp" method="post" style="display:inline;">
+                    <input type="hidden" name="remove" value="<%= i %>">
+                    <input type="submit" class="remove-button" value="Remove">
+                </form>
+            </li>
+        <% } %>
     </ul>
 </body>
 </html>
